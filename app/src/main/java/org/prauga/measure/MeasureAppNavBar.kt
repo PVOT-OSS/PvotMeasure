@@ -9,8 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.prauga.pvot.designsystem.components.navigation.PvotNavBar
-import com.prauga.pvot.designsystem.components.navigation.PvotTabItem
+import com.prauga.pvot.designsystem.navigation.PvotNavBar
+import com.prauga.pvot.designsystem.navigation.PvotTabItem
 import org.prauga.measure.screens.LevelScreen
 import org.prauga.measure.screens.MeasureScreen
 

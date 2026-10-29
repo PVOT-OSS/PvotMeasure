@@ -22,5 +22,6 @@ dependencyResolutionManagement {
 rootProject.name = "Measure"
 include(":app")
 
-include(":design-system")
-project(":design-system").projectDir = file("PvotLib/design-system")
+// PvotLib builds from the submodule with its own build-logic and version catalog;
+// com.prauga.pvot:design-system resolves to its :design-system project.
+includeBuild("PvotLib")
