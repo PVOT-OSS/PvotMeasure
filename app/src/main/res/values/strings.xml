@@ -5,6 +5,9 @@
     <string name="tab_measure">Measure</string>
     <string name="tab_level">Level</string>
 
+    <!-- Level -->
+    <string name="level_degrees">%1$d°</string>
+
     <!-- Content descriptions -->
     <string name="cd_measure">Navigate to Measure</string>
     <string name="cd_level">Navigate to Level</string>

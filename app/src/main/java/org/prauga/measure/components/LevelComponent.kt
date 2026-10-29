@@ -8,6 +8,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,13 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-import org.prauga.measure.ui.theme.BackgroundDark
-import org.prauga.measure.ui.theme.GridColor
-import org.prauga.measure.ui.theme.LevelGreen
-import org.prauga.measure.ui.theme.LevelOrange
+import androidx.compose.ui.unit.dp
+import com.prauga.pvot.designsystem.theme.PvotSpacing
+import org.prauga.measure.R
 import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.sqrt
@@ -53,8 +52,9 @@ fun LevelComponent(
     val distanceFromCenter = sqrt(animatedX * animatedX + animatedY * animatedY)
     val isLevel = distanceFromCenter < 0.03f
 
+    val colors = MaterialTheme.colorScheme
     val ballColor by animateColorAsState(
-        targetValue = if (isLevel) LevelGreen else LevelOrange,
+        targetValue = if (isLevel) colors.primary else colors.tertiary,
         label = "ballColor"
     )
 
@@ -64,16 +64,16 @@ fun LevelComponent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(BackgroundDark)
+            .background(colors.background)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val gridSpacing = 40f
+            val gridSpacing = PvotSpacing.L.toPx()
 
             // vertical grid
             var x = 0f
             while (x <= size.width) {
                 drawLine(
-                    color = GridColor,
+                    color = colors.surfaceVariant,
                     start = Offset(x, 0f),
                     end = Offset(x, size.height),
                     strokeWidth = 1f
@@ -85,7 +85,7 @@ fun LevelComponent(
             var y = 0f
             while (y <= size.height) {
                 drawLine(
-                    color = GridColor,
+                    color = colors.surfaceVariant,
                     start = Offset(0f, y),
                     end = Offset(size.width, y),
                     strokeWidth = 1f
@@ -95,7 +95,8 @@ fun LevelComponent(
 
             val centerX = size.width / 2
             val centerY = size.height / 2
-            val ballRadius = 300f
+            // About a quarter of the screen's short side, as it was at 300px on a 1080px phone
+            val ballRadius = size.minDimension * 0.28f
             val maxOffset = size.width / 3
 
             // Calculate ball separation based on tilt
@@ -112,15 +113,16 @@ fun LevelComponent(
             val ball2Y = centerY - dirY * separation
 
             // ball shadows
+            val shadowOffset = 2.dp.toPx()
             drawCircle(
-                color = Color.Black.copy(alpha = 0.2f),
+                color = colors.scrim.copy(alpha = 0.2f),
                 radius = ballRadius,
-                center = Offset(ball1X + 6f, ball1Y + 6f)
+                center = Offset(ball1X + shadowOffset, ball1Y + shadowOffset)
             )
             drawCircle(
-                color = Color.Black.copy(alpha = 0.2f),
+                color = colors.scrim.copy(alpha = 0.2f),
                 radius = ballRadius,
-                center = Offset(ball2X + 6f, ball2Y + 6f)
+                center = Offset(ball2X + shadowOffset, ball2Y + shadowOffset)
             )
 
             // Draw ball 1
@@ -157,9 +159,9 @@ fun LevelComponent(
         }
 
         Text(
-            text = "${abs(totalDegrees).toInt()}°",
+            text = stringResource(R.string.level_degrees, abs(totalDegrees).toInt()),
             color = ballColor,
-            fontSize = 96.sp,
+            style = MaterialTheme.typography.displayLarge,
             fontWeight = FontWeight.Light,
             modifier = Modifier.align(Alignment.Center)
         )
