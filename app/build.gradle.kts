@@ -3,6 +3,12 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+val versionMajor = rootProject.extra["versionMajor"] as Int
+val versionMinor = rootProject.extra["versionMinor"] as Int
+val versionPatch = rootProject.extra["versionPatch"] as Int
+val computedVersionCode = rootProject.extra["computedVersionCode"] as Int
+val computedVersionName = rootProject.extra["computedVersionName"] as String
+
 android {
     namespace = "org.prauga.measure"
     compileSdk {
@@ -13,8 +19,12 @@ android {
         applicationId = "org.prauga.measure"
         minSdk = 30
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = computedVersionCode
+        versionName = computedVersionName
+
+        buildConfigField("int", "VERSION_MAJOR", "$versionMajor")
+        buildConfigField("int", "VERSION_MINOR", "$versionMinor")
+        buildConfigField("int", "VERSION_PATCH", "$versionPatch")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -34,6 +44,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
