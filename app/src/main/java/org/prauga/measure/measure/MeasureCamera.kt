@@ -38,6 +38,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -87,7 +88,7 @@ internal fun MeasureCamera(
     onSessionFailure: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val locale = Locale.getDefault()
+    val locale = LocalConfiguration.current.locales[0]
     var board by remember { mutableStateOf(DistanceBoard<Anchor>()) }
     var positions by remember { mutableStateOf<Map<Anchor, Position>>(emptyMap()) }
     val viewProjection = remember { mutableStateOf<FloatArray?>(null) }
