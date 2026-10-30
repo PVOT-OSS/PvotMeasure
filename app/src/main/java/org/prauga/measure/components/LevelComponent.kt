@@ -1,169 +1,197 @@
 package org.prauga.measure.components
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.prauga.pvot.designsystem.theme.PvotSpacing
 import org.prauga.measure.R
 import kotlin.math.abs
 import kotlin.math.asin
-import kotlin.math.sqrt
+import kotlin.math.roundToInt
 
-
+/**
+ * Bubble level: glass spheres while the device lies flat, a horizon while it stands
+ * upright, and a screen flooded with the level colour once it reads 0°.
+ */
 @Composable
 fun LevelComponent(
-    tiltX: Float,
-    tiltY: Float,
+    gravity: Gravity,
+    isFlat: Boolean,
+    isLevel: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val animatedX by animateFloatAsState(
-        targetValue = tiltX,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "ballX"
+    val colors = levelColors()
+    val motion = spring<Float>(
+        dampingRatio = Spring.DampingRatioLowBouncy,
+        stiffness = Spring.StiffnessMediumLow
     )
-    val animatedY by animateFloatAsState(
-        targetValue = tiltY,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "ballY"
+    val x by animateFloatAsState(gravity.x, motion, label = "gravityX")
+    val y by animateFloatAsState(gravity.y, motion, label = "gravityY")
+    val z by animateFloatAsState(gravity.z, motion, label = "gravityZ")
+
+    val levelProgress by animateFloatAsState(
+        targetValue = if (isLevel) 1f else 0f,
+        // Short, so the half-blended colours are barely on screen
+        animationSpec = tween(durationMillis = 120),
+        label = "levelProgress"
+    )
+    // Flip the readout halfway through the fade so every frame agrees with the
+    // background: mostly level colour reads 0°, mostly background reads at least 1°
+    val showsLevel = levelProgress >= 0.5f
+
+    val reading =
+        if (isFlat) flatReading(x, y, showsLevel) else horizonReading(x, y, showsLevel)
+    val readoutRotation by animateFloatAsState(
+        targetValue = reading.readoutRotation,
+        label = "readoutRotation"
     )
 
-    val distanceFromCenter = sqrt(animatedX * animatedX + animatedY * animatedY)
-    val isLevel = distanceFromCenter < 0.03f
-
-    val colors = MaterialTheme.colorScheme
-    val ballColor by animateColorAsState(
-        targetValue = if (isLevel) colors.primary else colors.tertiary,
-        label = "ballColor"
+    // Leaning back lifts the horizon off the marks and leaning forward drops it
+    val lean = Math.toDegrees(asin(z.coerceIn(-1f, 1f).toDouble())).toFloat()
+    // The number sits below the horizon, and moves above once a forward lean would
+    // drop the line onto it
+    val readoutOffset by animateDpAsState(
+        targetValue = when {
+            isFlat -> 0.dp
+            lean < -3f -> (-96).dp
+            else -> 96.dp
+        },
+        label = "readoutOffset"
     )
 
-    val totalDegrees =
-        Math.toDegrees(asin(distanceFromCenter.coerceIn(0f, 1f).toDouble())).toFloat()
+    // Tick once each time the device settles into level, but not on first open
+    val haptic = LocalHapticFeedback.current
+    var wasLevel by remember { mutableStateOf(isLevel) }
+    LaunchedEffect(isLevel) {
+        if (isLevel && !wasLevel) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        wasLevel = isLevel
+    }
+
+    val content = lerp(
+        colors.content,
+        if (isFlat) colors.onLevelSurface else colors.onLevelBackground,
+        levelProgress
+    )
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(colors.background)
+            .background(lerp(colors.background, colors.levelBackground, levelProgress))
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val gridSpacing = PvotSpacing.L.toPx()
+        // Gone by the halfway point so the grid never shows over the level colour
+        LevelGrid(
+            color = colors.grid.copy(alpha = (1f - levelProgress * 2f).coerceAtLeast(0f)),
+            modifier = Modifier.fillMaxSize()
+        )
 
-            // vertical grid
-            var x = 0f
-            while (x <= size.width) {
-                drawLine(
-                    color = colors.surfaceVariant,
-                    start = Offset(x, 0f),
-                    end = Offset(x, size.height),
-                    strokeWidth = 1f
-                )
-                x += gridSpacing
-            }
-
-            // horizontal grid
-            var y = 0f
-            while (y <= size.height) {
-                drawLine(
-                    color = colors.surfaceVariant,
-                    start = Offset(0f, y),
-                    end = Offset(size.width, y),
-                    strokeWidth = 1f
-                )
-                y += gridSpacing
-            }
-
-            val centerX = size.width / 2
-            val centerY = size.height / 2
-            // About a quarter of the screen's short side, as it was at 300px on a 1080px phone
-            val ballRadius = size.minDimension * 0.28f
-            val maxOffset = size.width / 3
-
-            // Calculate ball separation based on tilt
-            val separation = distanceFromCenter * maxOffset
-
-            // Direction of tilt
-            val dirX = if (distanceFromCenter > 0.001f) animatedX / distanceFromCenter else 0f
-            val dirY = if (distanceFromCenter > 0.001f) animatedY / distanceFromCenter else 0f
-
-            val ball1X = centerX - dirX * separation
-            val ball1Y = centerY + dirY * separation
-
-            val ball2X = centerX + dirX * separation
-            val ball2Y = centerY - dirY * separation
-
-            // ball shadows
-            val shadowOffset = 2.dp.toPx()
-            drawCircle(
-                color = colors.scrim.copy(alpha = 0.2f),
-                radius = ballRadius,
-                center = Offset(ball1X + shadowOffset, ball1Y + shadowOffset)
+        if (isFlat) {
+            LevelSpheres(
+                x = x,
+                y = y,
+                levelProgress = levelProgress,
+                colors = colors,
+                modifier = Modifier.fillMaxSize()
             )
-            drawCircle(
-                color = colors.scrim.copy(alpha = 0.2f),
-                radius = ballRadius,
-                center = Offset(ball2X + shadowOffset, ball2Y + shadowOffset)
-            )
-
-            // Draw ball 1
-            val gradient1 = Brush.radialGradient(
-                colors = listOf(
-                    ballColor.copy(alpha = 0.5f),
-                    ballColor.copy(alpha = 0.35f),
-                    ballColor.copy(alpha = 0.2f)
-                ),
-                center = Offset(ball1X - ballRadius * 0.3f, ball1Y - ballRadius * 0.3f),
-                radius = ballRadius * 1.5f
-            )
-            drawCircle(
-                brush = gradient1,
-                radius = ballRadius,
-                center = Offset(ball1X, ball1Y)
-            )
-
-            // Draw ball 2
-            val gradient2 = Brush.radialGradient(
-                colors = listOf(
-                    ballColor.copy(alpha = 0.5f),
-                    ballColor.copy(alpha = 0.35f),
-                    ballColor.copy(alpha = 0.2f)
-                ),
-                center = Offset(ball2X - ballRadius * 0.3f, ball2Y - ballRadius * 0.3f),
-                radius = ballRadius * 1.5f
-            )
-            drawCircle(
-                brush = gradient2,
-                radius = ballRadius,
-                center = Offset(ball2X, ball2Y)
+        } else {
+            // Ease the surface onto the marks as the level turns over, so 0° never
+            // shows a line slightly slanted or off the marks
+            val roll = rollDegrees(x, y)
+            val hold = quarterTurns(x, y) * 90f
+            // 20° of lean moves the surface the full quarter screen, so small leans near
+            // level are still easy to see
+            LevelHorizon(
+                rollDegrees = hold + (roll - hold) * (1f - levelProgress),
+                leanFraction = (lean / 20f).coerceIn(-1f, 1f) * (1f - levelProgress),
+                levelProgress = levelProgress,
+                colors = colors,
+                modifier = Modifier.fillMaxSize()
             )
         }
 
-        Text(
-            text = stringResource(R.string.level_degrees, abs(totalDegrees).toInt()),
-            color = ballColor,
-            style = MaterialTheme.typography.displayLarge,
-            fontWeight = FontWeight.Light,
-            modifier = Modifier.align(Alignment.Center)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .rotate(readoutRotation),
+            contentAlignment = Alignment.Center
+        ) {
+            if (!isFlat) HorizonMarks(color = content, modifier = Modifier.fillMaxSize())
+            Text(
+                text = stringResource(R.string.level_degrees, reading.degrees),
+                color = content,
+                // Tabular figures keep the readout from shifting as digits change
+                style = MaterialTheme.typography.displayLarge.copy(fontFeatureSettings = "tnum"),
+                modifier = Modifier.offset(y = readoutOffset)
+            )
+        }
+    }
+}
+
+/** Signed degrees to show, and how far to turn the readout to keep it upright. */
+private data class LevelReading(val degrees: Int, val readoutRotation: Float)
+
+/** Level always reads 0°, and anything else at least 1°, so colour and number agree. */
+private fun shownDegrees(angle: Float, isLevel: Boolean): Int =
+    if (isLevel) 0 else maxOf(1, angle.roundToInt())
+
+/** Total tilt from flat, signed by the axis it leans along most. */
+private fun flatReading(x: Float, y: Float, isLevel: Boolean): LevelReading {
+    val degrees = shownDegrees(flatTiltDegrees(x, y), isLevel)
+    val negative = if (abs(y) >= abs(x)) y < 0f else x < 0f
+    return LevelReading(if (negative) -degrees else degrees, readoutRotation = 0f)
+}
+
+/** Lean away from standing perfectly vertical, with the readout kept upright. */
+private fun horizonReading(x: Float, y: Float, isLevel: Boolean): LevelReading =
+    LevelReading(
+        degrees = shownDegrees(uprightTiltDegrees(x, y), isLevel),
+        readoutRotation = quarterTurns(x, y) * 90f
+    )
+
+/** Fixed marks at each edge that the horizon lines up with when level. */
+@Composable
+private fun HorizonMarks(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier) {
+        val markLength = size.width * 0.1f
+        val inset = size.width * 0.05f
+        val stroke = 3.dp.toPx()
+        drawLine(
+            color = color,
+            start = Offset(inset, center.y),
+            end = Offset(inset + markLength, center.y),
+            strokeWidth = stroke,
+            cap = StrokeCap.Round
+        )
+        drawLine(
+            color = color,
+            start = Offset(size.width - inset - markLength, center.y),
+            end = Offset(size.width - inset, center.y),
+            strokeWidth = stroke,
+            cap = StrokeCap.Round
         )
     }
 }
