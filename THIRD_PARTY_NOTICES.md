@@ -2,7 +2,8 @@
 
 ## Tabler Icons
 
-The icons in `app/src/main/res/drawable/` (`ic_measure.xml`, `ic_level.xml`, `ic_settings.xml`) are converted from
+The icons in `app/src/main/res/drawable/` (`ic_measure.xml`, `ic_level.xml`, `ic_settings.xml`,
+`ic_arrow_back_up.xml`, `ic_trash.xml`, `ic_check.xml`, `ic_plus.xml`) are converted from
 [Tabler Icons](https://tabler.io/icons), Copyright (c) 2020-2026 Paweł Kuna, MIT License.
 The license text is in `LICENSES/MIT.txt`.
 
