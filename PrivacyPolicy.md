@@ -5,33 +5,52 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 # Privacy Policy — Measure
 
-_Effective 30 October 2026_
+_Effective 31 October 2026_
 
-Measure (package `org.prauga.measure`) is a measuring and spirit level app published by Saalim
-Quadri for PVOT-OSS. This policy explains what the app does with your data.
+Measure (package `org.prauga.measure`) is a measuring tape and spirit level app published by
+Saalim Quadri for PVOT-OSS. This policy explains what the app does with your data.
 
-**In short: the app doesn't collect, store, send, share or sell any personal data. It has no
-accounts, no ads, no analytics and no tracking, and it has no permission to use the internet.**
+**In short: the app doesn't collect, send, share or sell any personal data. It has no accounts, no
+ads, no analytics and no tracking. Camera images are used live on your device and never saved.**
 
 ## What the app uses
 
-- **The accelerometer**, to show how far your device is tilted in the Level view. Readings are used
-  live while the Level view is open and are never stored.
+- **The camera**, only in the Measure view and only if you allow it, so you can place points in
+  the room and measure the distance between them. The camera feed is processed live on your device
+  and is never recorded, saved or sent anywhere by the app. Level and Settings work without it.
+- **The motion sensors** (accelerometer and gyroscope), to show how far your device is tilted in
+  the Level view and, together with the camera, to track your device's movement while measuring.
+  Readings are used live and never stored.
+
+## Google Play Services for AR
+
+The Measure view runs on Google Play Services for AR (ARCore), which is provided by Google LLC and
+governed by the [Google Privacy Policy](https://policies.google.com/privacy). It is a separate app
+on your device; if it isn't installed, Android may offer to install it from Google Play when you
+open the Measure view.
 
 ## What the app keeps on your device
 
-Nothing. The app saves no files or settings; closing it discards everything it showed.
+- **Your settings**: whether liquid glass is on and whether lengths are shown in imperial units.
 
-## What other services see
+Measurements are not saved: they disappear when you clear them or close the app. The settings
+stay in the app's private storage and are deleted when you clear the app's storage or uninstall
+it.
 
-None. The app sends nothing anywhere and relies on no online service.
+## Backups
+
+If you turn on Android's device backup, Android may include the app's settings in your device
+backup (for example, Google's backup on most devices), under the terms of that backup service. The
+app itself never sends them anywhere.
 
 ## Permissions
 
-The app asks for no permissions. Its manifest contains only
-`org.prauga.measure.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`, which Android's AndroidX library adds
-so that the app's own components can talk to each other; it gives the app access to none of your
-data. The app does not have the `INTERNET` permission.
+- `CAMERA`: to see the room in the Measure view, as described above. The app asks for it when you
+  open the Measure view; you can refuse.
+- `VIBRATE`: for a short tap when the level reaches flat or a point is placed.
+- `INTERNET`: added by the SceneView library the Measure view is built on. The app itself makes no
+  network requests and sends nothing; Google Play Services for AR may use the network under its own
+  terms, as described above.
 
 ## Children
 
