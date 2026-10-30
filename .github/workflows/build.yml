@@ -13,4 +13,5 @@ jobs:
   android:
     uses: PVOT-OSS/workflows/.github/workflows/android-build.yml@main
     with:
+      java-version: '21'
       upload-artifacts: true
