@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
 
     implementation(libs.pvot.design.system)
+    implementation(libs.sceneview.ar)
 
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
