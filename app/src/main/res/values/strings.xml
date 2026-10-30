@@ -6,6 +6,24 @@
     <string name="tab_level">Level</string>
     <string name="tab_settings">Settings</string>
 
+    <!-- Measure -->
+    <string name="measure_camera_needed">Measure needs the camera to see the room around you.</string>
+    <string name="measure_allow_camera">Allow camera</string>
+    <string name="measure_ar_unsupported_title">AR is not available</string>
+    <string name="measure_ar_unsupported_message">This device does not support Google Play Services for AR, which Measure needs to place points in the room.</string>
+    <string name="measure_ar_failed_title">The camera could not start</string>
+    <string name="measure_ar_failed_message">Close other apps that use the camera and try again.</string>
+    <string name="measure_retry">Try again</string>
+    <string name="measure_hint_aim">Aim at a surface, then tap Add point.</string>
+    <string name="measure_hint_surface">Keep moving your phone slowly until the ring turns violet.</string>
+    <string name="measure_hint_next">Aim at the next point.</string>
+    <string name="measure_hint_tracking">Move your phone slowly to find surfaces.</string>
+    <string name="measure_total">Total %1$s</string>
+    <string name="measure_add_point">Add point</string>
+    <string name="cd_measure_undo">Undo last point</string>
+    <string name="cd_measure_done">Finish this line</string>
+    <string name="cd_measure_clear">Clear all points</string>
+
     <!-- Settings -->
     <string name="settings_section_appearance">Appearance</string>
     <string name="settings_glass_title">Liquid glass</string>

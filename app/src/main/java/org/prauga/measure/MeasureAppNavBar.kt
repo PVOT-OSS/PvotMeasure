@@ -79,7 +79,8 @@ fun MeasureAppNavBar(preferences: AppPreferences) {
                     navCompact = false
                 },
                 tabs = tabs,
-                compact = navCompact,
+                // The camera wants the room, not the bar: it stays small while measuring.
+                compact = navCompact || selectedTab == 0,
                 backdrop = backdrop
             )
         }
@@ -97,7 +98,7 @@ fun MeasureAppNavBar(preferences: AppPreferences) {
                 .padding(top = innerPadding.calculateTopPadding())
 
             when (selectedTab) {
-                0 -> MeasureScreen(modifier = screenModifier)
+                0 -> MeasureScreen(unitSystem = preferences.unitSystem, modifier = screenModifier)
                 1 -> LevelScreen(modifier = screenModifier)
                 2 -> SettingsScreen(preferences = preferences, modifier = screenModifier)
             }
