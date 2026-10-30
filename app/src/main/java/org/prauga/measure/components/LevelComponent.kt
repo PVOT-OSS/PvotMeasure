@@ -18,7 +18,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.prauga.pvot.designsystem.theme.PvotSpacing
 import org.prauga.measure.R
 import kotlin.math.abs
@@ -113,7 +112,7 @@ fun LevelComponent(
             val ball2Y = centerY - dirY * separation
 
             // ball shadows
-            val shadowOffset = 2.dp.toPx()
+            val shadowOffset = (PvotSpacing.XS / 2).toPx()
             drawCircle(
                 color = colors.scrim.copy(alpha = 0.2f),
                 radius = ballRadius,
