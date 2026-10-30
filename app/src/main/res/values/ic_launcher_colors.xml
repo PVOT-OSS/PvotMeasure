@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher icon colours from the light Pvot palette; values-night holds the dark ones. -->
+<resources>
+    <color name="ic_launcher_background">#FFFFFFFF</color>
+    <color name="ic_launcher_sphere">#FFDDD8FF</color>
+    <color name="ic_launcher_rim">#FF5A4BFF</color>
+    <color name="ic_launcher_line">#FF1C1B1F</color>
+</resources>
