@@ -1,0 +1,25 @@
+Measure is a measuring tape and a spirit level in your pocket, with a clean design and nothing in the way.
+
+Measure in the room
+• Point your camera at a surface and tap Add point to measure from one spot to the next
+• Chain points to measure along a wall or around a table, with each segment and the total shown
+• Undo the last point, finish a line and start another, or clear them all
+• Uses depth on supported phones to place points on any surface, not only flat ones
+• Lengths in centimetres and metres, or feet and inches
+
+Level anything
+• Lay your phone flat: two glass spheres drift apart as it tilts and merge into one bubble at level
+• Stand it upright: a horizon stays level with the world as you turn it
+• The tilt in degrees, a screen that floods with colour and a gentle tap when you hit 0°
+
+Made for your phone
+• Dark and light themes
+• Liquid glass on the navigation bar, or a lighter frosted look if you prefer
+• Built on Pvot, the design system behind PVOT-OSS's apps
+
+Private and open
+• No ads, no accounts, no tracking
+• The camera is used only live, to measure; nothing is recorded or saved
+• Free and open source under the GPL-3.0-or-later licence: github.com/PVOT-OSS/PvotMeasure
+
+Measuring in the room needs a phone that supports Google Play Services for AR. Measurements are estimates: move slowly and keep surfaces well lit for the best results. The level works on every phone.
