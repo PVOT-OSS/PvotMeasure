@@ -1,0 +1,124 @@
+From d85f6b1a5a4e41e1fd60a1eccd8cf0a013a958a3 Mon Sep 17 00:00:00 2001
+From: Shivansh Pandey <shivanshp987@gmail.com>
+Date: Sat, 31 Oct 2026 18:20:36 +0530
+Subject: [PATCH] patches: Use the system sans-serif for accent text
+
+Assisted-By: LLM
+Signed-off-by: Shivansh Pandey <shivanshp987@gmail.com>
+---
+ patches/series                                |  1 +
+ ...he-system-sans-serif-for-accent-text.patch | 93 +++++++++++++++++++
+ 2 files changed, 94 insertions(+)
+ create mode 100644 patches/veyra/Use-the-system-sans-serif-for-accent-text.patch
+
+diff --git a/patches/series b/patches/series
+index cc3dafa..acda31b 100644
+--- a/patches/series
++++ b/patches/series
+@@ -220,3 +220,4 @@ cromite/Eyeo-Adblock-for-Cromite.patch
+ veyra/Fix-the-omnibox-build-on-Android-without-VR.patch                                           # F0 156 build fix
+ veyra/Build-the-Omaha-update-status-without-Play-Services.patch                                    # F1 156 build fix
+ veyra/Report-no-brand-code-to-the-activity-reporter.patch                                          # F1 156 build fix
++veyra/Use-the-system-sans-serif-for-accent-text.patch                                              # F12 UI fonts
+diff --git a/patches/veyra/Use-the-system-sans-serif-for-accent-text.patch b/patches/veyra/Use-the-system-sans-serif-for-accent-text.patch
+new file mode 100644
+index 0000000..c0e198b
+--- /dev/null
++++ b/patches/veyra/Use-the-system-sans-serif-for-accent-text.patch
+@@ -0,0 +1,93 @@
++From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
++From: Shivansh Pandey <shivanshp987@gmail.com>
++Date: Sat, 31 Oct 2026 00:00:00 +0000
++Subject: [PATCH] Use the system sans-serif for accent text
++
++Public Chromium ships @font/accent_font as an empty <font-family/>;
++Google's own build fills it with Google Sans. Headline, Headline2,
++TextAccentLarge and AlertDialogTitleStyle point at it, so every view
++using them parses an empty font file, logs "Failed to find font-family
++tag" and falls back to the default typeface. Name the system family
++directly instead; these styles are regular weight, so sans-serif keeps it.
++
++Three call sites ask for the "google-sans-medium" system font, which only
++Pixel phones have. Elsewhere the New Tab Page search hint loses its medium
++weight, and on Pixels these spots use Google Sans while the rest of the UI
++does not. Use sans-serif-medium, which every Android version has.
++---
++diff --git a/chrome/android/java/src/org/chromium/chrome/browser/ntp/RecentTabCountDrawable.java b/chrome/android/java/src/org/chromium/chrome/browser/ntp/RecentTabCountDrawable.java
++--- a/chrome/android/java/src/org/chromium/chrome/browser/ntp/RecentTabCountDrawable.java
+++++ b/chrome/android/java/src/org/chromium/chrome/browser/ntp/RecentTabCountDrawable.java
++@@ -52,7 +52,7 @@ public class RecentTabCountDrawable extends DrawableWrapper {
++ 
++         mTextPaint.setAntiAlias(true);
++         mTextPaint.setTextAlign(Align.CENTER);
++-        mTextPaint.setTypeface(Typeface.create("google-sans-medium", Typeface.BOLD));
+++        mTextPaint.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
++         mTextPaint.setColor(getColorForState());
++         mTextPaint.setTextSize(
++                 context.getResources().getDimension(R.dimen.recent_tabs_count_text_size));
++diff --git a/chrome/android/java/src/org/chromium/chrome/browser/ntp/search/SearchBoxContainerView.java b/chrome/android/java/src/org/chromium/chrome/browser/ntp/search/SearchBoxContainerView.java
++--- a/chrome/android/java/src/org/chromium/chrome/browser/ntp/search/SearchBoxContainerView.java
+++++ b/chrome/android/java/src/org/chromium/chrome/browser/ntp/search/SearchBoxContainerView.java
++@@ -69,7 +69,7 @@ public class SearchBoxContainerView extends LinearLayout {
++         mIsNtpAuroraEnabled = NewTabPageUtils.isNtpAuroraEnabled();
++ 
++         Resources res = getResources();
++-        Typeface typeface = Typeface.create("google-sans-medium", Typeface.NORMAL);
+++        Typeface typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL);
++         mHintTextView.setTypeface(typeface);
++ 
++         @Px int size = res.getDimensionPixelSize(R.dimen.omnibox_search_engine_logo_composed_size);
++diff --git a/chrome/browser/ui/android/bars_common/java/src/org/chromium/chrome/browser/ui/android/bars_common/TabSwitcherDrawable.java b/chrome/browser/ui/android/bars_common/java/src/org/chromium/chrome/browser/ui/android/bars_common/TabSwitcherDrawable.java
++--- a/chrome/browser/ui/android/bars_common/java/src/org/chromium/chrome/browser/ui/android/bars_common/TabSwitcherDrawable.java
+++++ b/chrome/browser/ui/android/bars_common/java/src/org/chromium/chrome/browser/ui/android/bars_common/TabSwitcherDrawable.java
++@@ -105,7 +105,7 @@ public class TabSwitcherDrawable extends TintedDrawable {
++         mTextPaint.setAntiAlias(true);
++         mTextPaint.setSubpixelText(true);
++         mTextPaint.setTextAlign(Align.LEFT);
++-        mTextPaint.setTypeface(Typeface.create("google-sans-medium", Typeface.BOLD));
+++        mTextPaint.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
++         mTextPaint.setColor(getColorForState());
++ 
++         mNotificationBgPaint = new Paint();
++diff --git a/components/browser_ui/styles/android/java/res/values/styles.xml b/components/browser_ui/styles/android/java/res/values/styles.xml
++--- a/components/browser_ui/styles/android/java/res/values/styles.xml
+++++ b/components/browser_ui/styles/android/java/res/values/styles.xml
++@@ -104,7 +104,7 @@ found in the LICENSE file.
++         parent="RtlOverlay.DialogWindowTitle.AppCompat">
++         <item name="android:textColor">@color/default_text_color_list</item>
++         <item name="android:textSize">@dimen/headline_size</item>
++-        <item name="android:fontFamily">@font/accent_font</item>
+++        <item name="android:fontFamily">sans-serif</item>
++         <item name="android:fontFeatureSettings">@string/default_font_feature_settings</item>
++         <item name="android:textStyle">normal</item>
++     </style>
++diff --git a/ui/android/java/res/values/styles.xml b/ui/android/java/res/values/styles.xml
++--- a/ui/android/java/res/values/styles.xml
+++++ b/ui/android/java/res/values/styles.xml
++@@ -81,12 +81,12 @@ found in the LICENSE file.
++       text as they are missing textColor attributes
++     -->
++     <style name="TextAppearance.Headline">
++-        <item name="android:fontFamily">@font/accent_font</item>
+++        <item name="android:fontFamily">sans-serif</item>
++         <item name="android:textSize">@dimen/headline_size</item>
++         <item name="leading">@dimen/headline_size_leading</item>
++     </style>
++     <style name="TextAppearance.Headline2">
++-        <item name="android:fontFamily">@font/accent_font</item>
+++        <item name="android:fontFamily">sans-serif</item>
++         <item name="android:textSize">@dimen/headline2_size</item>
++         <item name="leading">@dimen/headline2_size_leading</item>
++     </style>
++@@ -112,7 +112,7 @@ found in the LICENSE file.
++         <item name="leading">@dimen/text_size_large_leading</item>
++     </style>
++     <style name="TextAppearance.TextAccentLarge" parent="TextAppearance.TextLarge">
++-        <item name="android:fontFamily">@font/accent_font</item>
+++        <item name="android:fontFamily">sans-serif</item>
++     </style>
++     <style name="TextAppearance.TextMediumThick" parent="TextAppearance.MediumStyle">
++         <item name="android:textSize">@dimen/text_size_medium</item>
++-- 
+-- 
+2.50.1 (Apple Git-155)
+
