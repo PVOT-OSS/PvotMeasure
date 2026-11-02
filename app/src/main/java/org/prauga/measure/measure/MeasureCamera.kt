@@ -3,6 +3,7 @@
 
 package org.prauga.measure.measure
 
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -64,12 +65,17 @@ import io.github.sceneview.ar.ARSceneScope
 import io.github.sceneview.ar.ARSceneView
 import io.github.sceneview.ar.arcore.hitTestDepth
 import io.github.sceneview.math.Position
+import org.prauga.measure.BuildConfig
 import org.prauga.measure.R
 import java.util.Locale
 import kotlin.math.roundToInt
 
-/** Where the reticle points: a world position and how to pin an anchor there. */
-private class AimHit(val position: Position, val createAnchor: (Session) -> Anchor?)
+/** Where the reticle points: a world position, what found it, and how to pin an anchor there. */
+private class AimHit(
+    val position: Position,
+    val source: String,
+    val createAnchor: (Session) -> Anchor?
+)
 
 private const val NEAR_METERS = 0.05f
 private const val FAR_METERS = 100f
@@ -115,8 +121,11 @@ internal fun MeasureCamera(
         val session = sessionHolder[0] ?: return
         val aimed = latestAim[0]
         val anchor = aimed?.createAnchor?.invoke(session) ?: return
+        val previous = board.active?.points?.lastOrNull()?.let { positions[it] }
         board = board.add(anchor)
-        positions = positions + (anchor to anchor.pose.toPosition())
+        val position = anchor.pose.toPosition()
+        positions = positions + (anchor to position)
+        if (BuildConfig.DEBUG) logPoint(position, aimed.source, previous)
         haptics.performHapticFeedback(HapticFeedbackType.Confirm)
     }
 
@@ -392,6 +401,14 @@ private fun Modifier.atScreenOf(
 
 private const val OFF_SCREEN = -10_000
 
+private const val LOG_TAG = "MeasureCamera"
+
+/** Debug builds only: a placed point in world metres, and the segment it closes, for checking accuracy. */
+private fun logPoint(p: Position, source: String, previous: Position?) {
+    val segment = previous?.let { String.format(Locale.ROOT, ", segment %.3f m", measureDistanceMeters(it, p)) }
+    Log.d(LOG_TAG, String.format(Locale.ROOT, "Point at (%.3f, %.3f, %.3f) m from %s", p.x, p.y, p.z, source) + segment.orEmpty())
+}
+
 private fun Pose.toPosition(): Position = Position(tx(), ty(), tz())
 
 /**
@@ -404,15 +421,15 @@ private fun hitTestCenter(frame: Frame, x: Float, y: Float): AimHit? {
     hits.firstOrNull { hit ->
         val plane = hit.trackable as? Plane
         plane != null && plane.subsumedBy == null && plane.isPoseInPolygon(hit.hitPose)
-    }?.let { return it.toAim() }
-    hits.firstOrNull { it.trackable is DepthPoint }?.let { return it.toAim() }
+    }?.let { return it.toAim("plane") }
+    hits.firstOrNull { it.trackable is DepthPoint }?.let { return it.toAim("depth point") }
     frame.hitTestDepth(x, y)?.let { depth ->
         val p = depth.position
-        return AimHit(p) { session -> session.createAnchor(Pose.makeTranslation(p.x, p.y, p.z)) }
+        return AimHit(p, "depth") { session -> session.createAnchor(Pose.makeTranslation(p.x, p.y, p.z)) }
     }
     return null
 }
 
-private fun HitResult.toAim(): AimHit = AimHit(hitPose.toPosition()) {
+private fun HitResult.toAim(source: String): AimHit = AimHit(hitPose.toPosition(), source) {
     takeIf { trackable.trackingState == TrackingState.TRACKING }?.createAnchor()
 }
