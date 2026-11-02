@@ -28,6 +28,7 @@
     <string name="settings_section_appearance">Appearance</string>
     <string name="settings_glass_title">Liquid glass</string>
     <string name="settings_glass_subtitle">Bends and refracts what is behind the navigation bar. Off gives a lighter frosted look.</string>
+    <string name="settings_section_units">Units</string>
     <string name="settings_units_title">Imperial units</string>
     <string name="settings_units_subtitle">Show lengths in feet and inches instead of centimetres and metres.</string>
     <string name="settings_inches_title">Inches only</string>
