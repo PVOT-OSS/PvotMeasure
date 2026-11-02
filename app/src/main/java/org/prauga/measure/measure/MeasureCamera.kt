@@ -137,7 +137,8 @@ internal fun MeasureCamera(
     Box(modifier = modifier.onSizeChanged { viewport = it }) {
         ARSceneView(
             modifier = Modifier.fillMaxSize(),
-            planeRenderer = board.isEmpty,
+            // Surfaces stay drawn while measuring, and go with the tracking that found them.
+            planeRenderer = tracking,
             sessionConfiguration = { session: Session, config: Config ->
                 config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL
                 config.depthMode = if (session.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
