@@ -113,19 +113,55 @@ fun SettingsScreen(
                 }
             }
         }
+        // Only means something with imperial units, so it shows only then.
+        if (preferences.imperialUnits) item(key = "inches_only") {
+            PvotCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateItem()
+                    .pvotReveal(3),
+                onClick = { preferences.updateInchesOnly(!preferences.inchesOnly) }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(PvotSpacing.L),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(PvotSpacing.L)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.settings_inches_title),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = stringResource(R.string.settings_inches_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = PvotSpacing.XS)
+                        )
+                    }
+                    Switch(
+                        checked = preferences.inchesOnly,
+                        onCheckedChange = preferences::updateInchesOnly
+                    )
+                }
+            }
+        }
         item {
             PvotSectionHeader(
                 title = stringResource(R.string.settings_section_about),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .pvotReveal(3)
+                    .pvotReveal(4)
             )
         }
         item {
             PvotCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .pvotReveal(4)
+                    .pvotReveal(5)
             ) {
                 Row(
                     modifier = Modifier

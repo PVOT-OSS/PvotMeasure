@@ -39,8 +39,21 @@ class AppPreferences(context: Context) {
         imperialUnits = enabled
     }
 
+    /** With [imperialUnits], every length in inches instead of feet and inches. */
+    var inchesOnly by mutableStateOf(prefs.getBoolean(KEY_INCHES_ONLY, false))
+        private set
+
+    fun updateInchesOnly(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_INCHES_ONLY, enabled).apply()
+        inchesOnly = enabled
+    }
+
     val unitSystem: MeasureUnitSystem
-        get() = if (imperialUnits) MeasureUnitSystem.Imperial else MeasureUnitSystem.Metric
+        get() = when {
+            !imperialUnits -> MeasureUnitSystem.Metric
+            inchesOnly -> MeasureUnitSystem.Inches
+            else -> MeasureUnitSystem.Imperial
+        }
 
     /** The value for [com.prauga.pvot.designsystem.effects.LocalPvotGlassIntensity]. */
     val glassIntensity: Float
@@ -50,5 +63,6 @@ class AppPreferences(context: Context) {
         const val PREFS_NAME = "measure_preferences"
         const val KEY_LIQUID_GLASS = "liquid_glass"
         const val KEY_IMPERIAL = "imperial_units"
+        const val KEY_INCHES_ONLY = "inches_only"
     }
 }

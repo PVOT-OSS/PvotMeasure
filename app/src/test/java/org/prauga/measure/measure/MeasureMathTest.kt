@@ -55,6 +55,15 @@ class MeasureMathTest {
     }
 
     @Test
+    fun inchLengths() {
+        val us = Locale.US
+        assertEquals("11 in", formatMeasureLength(0.28f, MeasureUnitSystem.Inches, us))
+        assertEquals("12 in", formatMeasureLength(0.3048f, MeasureUnitSystem.Inches, us))
+        assertEquals("40 in", formatMeasureLength(1.016f, MeasureUnitSystem.Inches, us))
+        assertEquals("0 in", formatMeasureLength(-1f, MeasureUnitSystem.Inches, us))
+    }
+
+    @Test
     fun unitsFollowTheLocale() {
         assertEquals(MeasureUnitSystem.Imperial, MeasureUnitSystem.forLocale(Locale.US))
         assertEquals(MeasureUnitSystem.Metric, MeasureUnitSystem.forLocale(Locale.UK))

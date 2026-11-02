@@ -10,6 +10,9 @@ import kotlin.math.roundToInt
 enum class MeasureUnitSystem {
     Metric,
     Imperial,
+
+    /** Imperial, but always in inches, as for furniture and screens. */
+    Inches,
     ;
 
     companion object {
@@ -25,7 +28,8 @@ private const val CENTIMETERS_PER_METER = 100f
 
 /**
  * A length as a person reads it off a tape: "42 cm" under a metre, "1.42 m" above (with the
- * locale's decimal separator), "11 in" under a foot, "3 ft 4 in" above. Whole centimetres and
+ * locale's decimal separator), "11 in" under a foot, "3 ft 4 in" above, or "40 in" in inches only.
+ * Whole centimetres and
  * inches only: a millimetre digit would promise precision the pose does not have.
  */
 fun formatMeasureLength(meters: Float, system: MeasureUnitSystem, locale: Locale): String {
@@ -49,5 +53,6 @@ fun formatMeasureLength(meters: Float, system: MeasureUnitSystem, locale: Locale
                 else -> "$feet ft $rest in"
             }
         }
+        MeasureUnitSystem.Inches -> "${(safe / METERS_PER_INCH).roundToInt()} in"
     }
 }
