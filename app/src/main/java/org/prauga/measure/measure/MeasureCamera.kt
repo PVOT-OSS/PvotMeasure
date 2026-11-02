@@ -38,8 +38,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -65,16 +65,16 @@ import io.github.sceneview.ar.ARSceneScope
 import io.github.sceneview.ar.ARSceneView
 import io.github.sceneview.ar.arcore.hitTestDepth
 import io.github.sceneview.math.Position
-import org.prauga.measure.BuildConfig
-import org.prauga.measure.R
 import java.util.Locale
 import kotlin.math.roundToInt
+import org.prauga.measure.BuildConfig
+import org.prauga.measure.R
 
 /** Where the reticle points: a world position, what found it, and how to pin an anchor there. */
 private class AimHit(
     val position: Position,
     val source: String,
-    val createAnchor: (Session) -> Anchor?
+    val createAnchor: (Session) -> Anchor?,
 )
 
 private const val NEAR_METERS = 0.05f
@@ -85,14 +85,14 @@ private const val AIM_EPSILON_METERS = 0.002f
 
 /**
  * The AR view with the Distance tool around it: aim the reticle, add points, read each segment and
- * the total. Points are ARCore anchors; lines, labels and the reticle are drawn by Compose from
- * the camera's matrices, so they take the Pvot theme.
+ * the total. Points are ARCore anchors; lines, labels and the reticle are drawn by Compose from the
+ * camera's matrices, so they take the Pvot theme.
  */
 @Composable
 internal fun MeasureCamera(
     unitSystem: MeasureUnitSystem,
     onSessionFailure: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val locale = LocalConfiguration.current.locales[0]
     var board by remember { mutableStateOf(DistanceBoard<Anchor>()) }
@@ -111,9 +111,7 @@ internal fun MeasureCamera(
     val currentBoard by rememberUpdatedState(board)
     val currentViewport by rememberUpdatedState(viewport)
 
-    DisposableEffect(Unit) {
-        onDispose { currentBoard.allPoints.forEach { it.detach() } }
-    }
+    DisposableEffect(Unit) { onDispose { currentBoard.allPoints.forEach { it.detach() } } }
 
     val haptics = LocalHapticFeedback.current
 
@@ -150,11 +148,12 @@ internal fun MeasureCamera(
             planeRenderer = tracking,
             sessionConfiguration = { session: Session, config: Config ->
                 config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL
-                config.depthMode = if (session.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
-                    Config.DepthMode.AUTOMATIC
-                } else {
-                    Config.DepthMode.DISABLED
-                }
+                config.depthMode =
+                    if (session.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+                        Config.DepthMode.AUTOMATIC
+                    } else {
+                        Config.DepthMode.DISABLED
+                    }
             },
             onSessionCreated = { sessionHolder[0] = it },
             onSessionFailure = { onSessionFailure() },
@@ -172,24 +171,31 @@ internal fun MeasureCamera(
                     val anchors = currentBoard.allPoints
                     val read = anchors.associateWith { it.pose.toPosition() }
                     val shown = positions
-                    if (anchors.any { shown[it] == null } ||
-                        measurePointsMoved(anchors.map { shown.getValue(it) }, anchors.map { read.getValue(it) })
+                    if (
+                        anchors.any { shown[it] == null } ||
+                            measurePointsMoved(
+                                anchors.map { shown.getValue(it) },
+                                anchors.map { read.getValue(it) },
+                            )
                     ) {
                         positions = read
                     }
 
                     val size = currentViewport
-                    val hit = if (size.width > 0) {
-                        hitTestCenter(frame, size.width / 2f, size.height / 2f)
-                    } else {
-                        null
-                    }
+                    val hit =
+                        if (size.width > 0) {
+                            hitTestCenter(frame, size.width / 2f, size.height / 2f)
+                        } else {
+                            null
+                        }
                     latestAim[0] = hit
                     val before = aimPosition
                     val after = hit?.position
-                    if ((before == null) != (after == null) ||
-                        (before != null && after != null &&
-                            measureDistanceMeters(before, after) > AIM_EPSILON_METERS)
+                    if (
+                        (before == null) != (after == null) ||
+                            (before != null &&
+                                after != null &&
+                                measureDistanceMeters(before, after) > AIM_EPSILON_METERS)
                     ) {
                         aimPosition = after
                     }
@@ -197,7 +203,7 @@ internal fun MeasureCamera(
                     latestAim[0] = null
                     if (aimPosition != null) aimPosition = null
                 }
-            }
+            },
         ) {
             // Points and lines are nodes of the AR scene, so they render in the same frame as the
             // camera image and cannot trail it.
@@ -210,73 +216,97 @@ internal fun MeasureCamera(
             unitSystem = unitSystem,
             locale = locale,
             viewProjection = viewProjection,
-            viewport = viewport
+            viewport = viewport,
         )
-        Reticle(
-            locked = aimPosition != null,
-            modifier = Modifier.align(Alignment.Center)
-        )
+        Reticle(locked = aimPosition != null, modifier = Modifier.align(Alignment.Center))
 
         val lastChain = chains.lastOrNull().orEmpty()
-        val total = measureChainMeters(if (live != null && liveFrom != null) activePoints + live else lastChain)
-        val liveMeters = if (live != null && liveFrom != null) measureDistanceMeters(liveFrom, live) else null
+        val total =
+            measureChainMeters(
+                if (live != null && liveFrom != null) activePoints + live else lastChain
+            )
+        val liveMeters =
+            if (live != null && liveFrom != null) measureDistanceMeters(liveFrom, live) else null
         ReadoutCard(
-            title = when {
-                !tracking -> stringResource(R.string.measure_hint_tracking)
-                liveMeters != null -> formatMeasureLength(liveMeters, unitSystem, locale)
-                lastChain.size >= 2 -> formatMeasureLength(total, unitSystem, locale)
-                aimPosition == null -> stringResource(R.string.measure_hint_surface)
-                board.isEmpty -> stringResource(R.string.measure_hint_aim)
-                else -> stringResource(R.string.measure_hint_next)
-            },
-            subtitle = if (tracking && total > 0f && (liveMeters != null || lastChain.size >= 2) &&
-                (activePoints.size >= 2 || liveMeters != null && activePoints.size >= 2)
-            ) {
-                stringResource(R.string.measure_total, formatMeasureLength(total, unitSystem, locale))
-            } else {
-                null
-            },
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + PvotSpacing.L)
-                .padding(horizontal = PvotSpacing.L)
+            title =
+                when {
+                    !tracking -> stringResource(R.string.measure_hint_tracking)
+                    liveMeters != null -> formatMeasureLength(liveMeters, unitSystem, locale)
+                    lastChain.size >= 2 -> formatMeasureLength(total, unitSystem, locale)
+                    aimPosition == null -> stringResource(R.string.measure_hint_surface)
+                    board.isEmpty -> stringResource(R.string.measure_hint_aim)
+                    else -> stringResource(R.string.measure_hint_next)
+                },
+            subtitle =
+                if (
+                    tracking &&
+                        total > 0f &&
+                        (liveMeters != null || lastChain.size >= 2) &&
+                        (activePoints.size >= 2 || liveMeters != null && activePoints.size >= 2)
+                ) {
+                    stringResource(
+                        R.string.measure_total,
+                        formatMeasureLength(total, unitSystem, locale),
+                    )
+                } else {
+                    null
+                },
+            modifier =
+                Modifier.align(Alignment.TopCenter)
+                    .padding(
+                        top =
+                            WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+                                PvotSpacing.L
+                    )
+                    .padding(horizontal = PvotSpacing.L),
         )
 
-        val barClearance = LocalPvotNavBarSizes.current.compactBarHeight +
-            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        val barClearance =
+            LocalPvotNavBarSizes.current.compactBarHeight +
+                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
         Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(bottom = barClearance + PvotSpacing.L + PvotSpacing.M)
-                .padding(horizontal = PvotSpacing.L),
-            horizontalArrangement = Arrangement.spacedBy(PvotSpacing.M, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier.align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(bottom = barClearance + PvotSpacing.L + PvotSpacing.M)
+                    .padding(horizontal = PvotSpacing.L),
+            horizontalArrangement =
+                Arrangement.spacedBy(PvotSpacing.M, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             PvotGlassIconButton(
                 onClick = { replaceBoard(board.undo()) },
                 backdrop = null,
-                enabled = !board.isEmpty
+                enabled = !board.isEmpty,
             ) {
-                Icon(painterResource(R.drawable.ic_arrow_back_up), stringResource(R.string.cd_measure_undo))
+                Icon(
+                    painterResource(R.drawable.ic_arrow_back_up),
+                    stringResource(R.string.cd_measure_undo),
+                )
             }
             Button(onClick = ::addPoint, enabled = aimPosition != null) {
                 Icon(painterResource(R.drawable.ic_plus), contentDescription = null)
-                Text(stringResource(R.string.measure_add_point), modifier = Modifier.padding(start = PvotSpacing.S))
+                Text(
+                    stringResource(R.string.measure_add_point),
+                    modifier = Modifier.padding(start = PvotSpacing.S),
+                )
             }
             PvotGlassIconButton(
                 onClick = { replaceBoard(board.finish()) },
                 backdrop = null,
-                enabled = board.canFinish
+                enabled = board.canFinish,
             ) {
                 Icon(painterResource(R.drawable.ic_check), stringResource(R.string.cd_measure_done))
             }
             PvotGlassIconButton(
                 onClick = { replaceBoard(board.clear()) },
                 backdrop = null,
-                enabled = !board.isEmpty
+                enabled = !board.isEmpty,
             ) {
-                Icon(painterResource(R.drawable.ic_trash), stringResource(R.string.cd_measure_clear))
+                Icon(
+                    painterResource(R.drawable.ic_trash),
+                    stringResource(R.string.cd_measure_clear),
+                )
             }
         }
 
@@ -289,19 +319,19 @@ private fun ReadoutCard(title: String, subtitle: String?, modifier: Modifier = M
     PvotCard(modifier = modifier) {
         Column(
             modifier = Modifier.padding(horizontal = PvotSpacing.L, vertical = PvotSpacing.M),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
             if (subtitle != null) {
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -311,13 +341,20 @@ private fun ReadoutCard(title: String, subtitle: String?, modifier: Modifier = M
 /** The ring in the middle of the view: the primary color once it has a surface to measure. */
 @Composable
 private fun Reticle(locked: Boolean, modifier: Modifier = Modifier) {
-    val color by animateColorAsState(
-        targetValue = if (locked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-        animationSpec = tween(PvotDurations.Short, easing = PvotMotion.Settle),
-        label = "reticle"
-    )
+    val color by
+        animateColorAsState(
+            targetValue =
+                if (locked) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface,
+            animationSpec = tween(PvotDurations.Short, easing = PvotMotion.Settle),
+            label = "reticle",
+        )
     Canvas(modifier = modifier.size(RETICLE_SIZE)) {
-        drawCircle(color = color, radius = size.minDimension / 2f - 1.dp.toPx(), style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))
+        drawCircle(
+            color = color,
+            radius = size.minDimension / 2f - 1.dp.toPx(),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()),
+        )
         drawCircle(color = color, radius = 2.dp.toPx())
     }
 }
@@ -328,27 +365,42 @@ private const val POINT_RADIUS_METERS = 0.007f
 private const val LINE_RADIUS_METERS = 0.0025f
 private const val AIM_RADIUS_METERS = 0.005f
 
-/** The points, the lines between them and the live line to the reticle, as nodes of the AR scene. */
+/**
+ * The points, the lines between them and the live line to the reticle, as nodes of the AR scene.
+ */
 @Composable
 private fun ARSceneScope.MeasureNodes(
     chains: List<List<Position>>,
     live: Pair<Position, Position>?,
-    color: Color
+    color: Color,
 ) {
-    val material = remember(materialLoader, color) { materialLoader.createUnlitColorInstance(color) }
+    val material =
+        remember(materialLoader, color) { materialLoader.createUnlitColorInstance(color) }
     DisposableEffect(material) { onDispose { materialLoader.destroyMaterialInstance(material) } }
 
     chains.forEachIndexed { c, points ->
         points.forEachIndexed { i, p ->
-            key("point-$c-$i") { SphereNode(radius = POINT_RADIUS_METERS, materialInstance = material, position = p) }
+            key("point-$c-$i") {
+                SphereNode(radius = POINT_RADIUS_METERS, materialInstance = material, position = p)
+            }
         }
         points.zipWithNext().forEachIndexed { i, (a, b) ->
-            key("line-$c-$i") { TubeNode(points = listOf(a, b), radius = LINE_RADIUS_METERS, materialInstance = material) }
+            key("line-$c-$i") {
+                TubeNode(
+                    points = listOf(a, b),
+                    radius = LINE_RADIUS_METERS,
+                    materialInstance = material,
+                )
+            }
         }
     }
     live?.let { (from, to) ->
         SphereNode(radius = AIM_RADIUS_METERS, materialInstance = material, position = to)
-        TubeNode(points = listOf(from, to), radius = LINE_RADIUS_METERS, materialInstance = material)
+        TubeNode(
+            points = listOf(from, to),
+            radius = LINE_RADIUS_METERS,
+            materialInstance = material,
+        )
     }
 }
 
@@ -360,38 +412,40 @@ private fun SegmentLabels(
     unitSystem: MeasureUnitSystem,
     locale: Locale,
     viewProjection: State<FloatArray?>,
-    viewport: IntSize
+    viewport: IntSize,
 ) {
     val segments = chains.flatMap { points -> points.zipWithNext() } + listOfNotNull(live)
     segments.forEach { (a, b) ->
-        PvotCard(
-            modifier = Modifier.atScreenOf(measureMidpoint(a, b), viewProjection, viewport)
-        ) {
+        PvotCard(modifier = Modifier.atScreenOf(measureMidpoint(a, b), viewProjection, viewport)) {
             Text(
                 text = formatMeasureLength(measureDistanceMeters(a, b), unitSystem, locale),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(horizontal = PvotSpacing.M, vertical = PvotSpacing.S)
+                modifier = Modifier.padding(horizontal = PvotSpacing.M, vertical = PvotSpacing.S),
             )
         }
     }
 }
 
-/** Centers the element on where [world] lands on screen, read at layout so frames do not recompose it. */
+/**
+ * Centers the element on where [world] lands on screen, read at layout so frames do not recompose
+ * it.
+ */
 private fun Modifier.atScreenOf(
     world: Position,
     viewProjection: State<FloatArray?>,
-    viewport: IntSize
+    viewport: IntSize,
 ): Modifier = layout { measurable, constraints ->
     val placeable = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
     layout(placeable.width, placeable.height) {
-        val screen = viewProjection.value?.let {
-            projectToScreen(it, world, viewport.width.toFloat(), viewport.height.toFloat())
-        }
+        val screen =
+            viewProjection.value?.let {
+                projectToScreen(it, world, viewport.width.toFloat(), viewport.height.toFloat())
+            }
         if (screen != null) {
             placeable.place(
                 (screen.x - placeable.width / 2f).roundToInt(),
-                (screen.y - placeable.height / 2f).roundToInt()
+                (screen.y - placeable.height / 2f).roundToInt(),
             )
         } else {
             placeable.place(OFF_SCREEN, OFF_SCREEN)
@@ -403,33 +457,57 @@ private const val OFF_SCREEN = -10_000
 
 private const val LOG_TAG = "MeasureCamera"
 
-/** Debug builds only: a placed point in world metres, and the segment it closes, for checking accuracy. */
+/**
+ * Debug builds only: a placed point in world metres, and the segment it closes, for checking
+ * accuracy.
+ */
 private fun logPoint(p: Position, source: String, previous: Position?) {
-    val segment = previous?.let { String.format(Locale.ROOT, ", segment %.3f m", measureDistanceMeters(it, p)) }
-    Log.d(LOG_TAG, String.format(Locale.ROOT, "Point at (%.3f, %.3f, %.3f) m from %s", p.x, p.y, p.z, source) + segment.orEmpty())
+    val segment =
+        previous?.let {
+            String.format(Locale.ROOT, ", segment %.3f m", measureDistanceMeters(it, p))
+        }
+    Log.d(
+        LOG_TAG,
+        String.format(Locale.ROOT, "Point at (%.3f, %.3f, %.3f) m from %s", p.x, p.y, p.z, source) +
+            segment.orEmpty(),
+    )
 }
 
 private fun Pose.toPosition(): Position = Position(tx(), ty(), tz())
 
 /**
- * What the reticle points at: a detected surface, else depth. A loose feature point is not
- * trusted, since its depth is the least reliable, so the reticle waits for a better read.
+ * What the reticle points at: a detected surface, else depth. A loose feature point is not trusted,
+ * since its depth is the least reliable, so the reticle waits for a better read.
  */
 private fun hitTestCenter(frame: Frame, x: Float, y: Float): AimHit? {
-    val hits = runCatching { frame.hitTest(x, y) }.getOrNull().orEmpty()
-        .filter { it.trackable.trackingState == TrackingState.TRACKING }
-    hits.firstOrNull { hit ->
-        val plane = hit.trackable as? Plane
-        plane != null && plane.subsumedBy == null && plane.isPoseInPolygon(hit.hitPose)
-    }?.let { return it.toAim("plane") }
-    hits.firstOrNull { it.trackable is DepthPoint }?.let { return it.toAim("depth point") }
+    val hits =
+        runCatching { frame.hitTest(x, y) }
+            .getOrNull()
+            .orEmpty()
+            .filter { it.trackable.trackingState == TrackingState.TRACKING }
+    hits
+        .firstOrNull { hit ->
+            val plane = hit.trackable as? Plane
+            plane != null && plane.subsumedBy == null && plane.isPoseInPolygon(hit.hitPose)
+        }
+        ?.let {
+            return it.toAim("plane")
+        }
+    hits
+        .firstOrNull { it.trackable is DepthPoint }
+        ?.let {
+            return it.toAim("depth point")
+        }
     frame.hitTestDepth(x, y)?.let { depth ->
         val p = depth.position
-        return AimHit(p, "depth") { session -> session.createAnchor(Pose.makeTranslation(p.x, p.y, p.z)) }
+        return AimHit(p, "depth") { session ->
+            session.createAnchor(Pose.makeTranslation(p.x, p.y, p.z))
+        }
     }
     return null
 }
 
-private fun HitResult.toAim(source: String): AimHit = AimHit(hitPose.toPosition(), source) {
-    takeIf { trackable.trackingState == TrackingState.TRACKING }?.createAnchor()
-}
+private fun HitResult.toAim(source: String): AimHit =
+    AimHit(hitPose.toPosition(), source) {
+        takeIf { trackable.trackingState == TrackingState.TRACKING }?.createAnchor()
+    }

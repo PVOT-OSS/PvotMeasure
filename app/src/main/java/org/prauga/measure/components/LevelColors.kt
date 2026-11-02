@@ -23,19 +23,20 @@ data class LevelColors(
     /** Readout over [levelBackground]. */
     val onLevelBackground: Color,
     /** Readout over [levelSurface]. */
-    val onLevelSurface: Color
+    val onLevelSurface: Color,
 )
 
 @Composable
-fun levelColors(): LevelColors = with(MaterialTheme.colorScheme) {
-    LevelColors(
-        background = background,
-        grid = surfaceVariant,
-        content = onBackground,
-        surface = surfaceVariant,
-        levelBackground = primaryContainer,
-        levelSurface = primary,
-        onLevelBackground = onPrimaryContainer,
-        onLevelSurface = onPrimary
-    )
-}
+fun levelColors(): LevelColors =
+    with(MaterialTheme.colorScheme) {
+        LevelColors(
+            background = background,
+            grid = surfaceVariant,
+            content = onBackground,
+            surface = surfaceVariant,
+            levelBackground = primaryContainer,
+            levelSurface = primary,
+            onLevelBackground = onPrimaryContainer,
+            onLevelSurface = onPrimary,
+        )
+    }

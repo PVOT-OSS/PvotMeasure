@@ -1,12 +1,12 @@
 package org.prauga.measure.components
 
 import android.view.Surface
+import kotlin.math.cos
+import kotlin.math.sin
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import kotlin.math.cos
-import kotlin.math.sin
 
 class GravityTest {
 
@@ -20,7 +20,7 @@ class GravityTest {
             x = (-sin(roll) * cos(lean)).toFloat(),
             y = (cos(roll) * cos(lean)).toFloat(),
             z = sin(lean).toFloat(),
-            rotation = Surface.ROTATION_0
+            rotation = Surface.ROTATION_0,
         )
     }
 

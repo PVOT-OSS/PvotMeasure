@@ -16,12 +16,11 @@ data class Gravity(val x: Float, val y: Float, val z: Float) {
         get() = Math.toDegrees(acos(abs(z).coerceIn(0f, 1f).toDouble())).toFloat()
 
     /** Flat or upright, with a 10° dead band so the mode doesn't flicker near 45°. */
-    fun isFlat(wasFlat: Boolean): Boolean =
-        if (wasFlat) tiltFromFlat < 50f else tiltFromFlat < 40f
+    fun isFlat(wasFlat: Boolean): Boolean = if (wasFlat) tiltFromFlat < 50f else tiltFromFlat < 40f
 
     /**
-     * Level once within 0.5°, and stays level until past 1°, so the screen doesn't
-     * strobe green while the reading hovers around the rounding edge.
+     * Level once within 0.5°, and stays level until past 1°, so the screen doesn't strobe green
+     * while the reading hovers around the rounding edge.
      */
     fun isLevel(isFlat: Boolean, wasLevel: Boolean): Boolean {
         val offLevel = if (isFlat) flatTiltDegrees(x, y) else uprightTiltDegrees(x, y)
@@ -36,12 +35,13 @@ data class Gravity(val x: Float, val y: Float, val z: Float) {
          * screen's for the given display [rotation].
          */
         fun fromSensor(x: Float, y: Float, z: Float, rotation: Int): Gravity {
-            val (sx, sy) = when (rotation) {
-                Surface.ROTATION_90 -> -y to x
-                Surface.ROTATION_180 -> -x to -y
-                Surface.ROTATION_270 -> y to -x
-                else -> x to y
-            }
+            val (sx, sy) =
+                when (rotation) {
+                    Surface.ROTATION_90 -> -y to x
+                    Surface.ROTATION_180 -> -x to -y
+                    Surface.ROTATION_270 -> y to -x
+                    else -> x to y
+                }
             val norm = sqrt(sx * sx + sy * sy + z * z)
             if (norm == 0f) return Flat
             return Gravity(sx / norm, sy / norm, z / norm)
@@ -54,23 +54,23 @@ fun flatTiltDegrees(x: Float, y: Float): Float =
     Math.toDegrees(asin(sqrt(x * x + y * y).coerceAtMost(1f).toDouble())).toFloat()
 
 /** Screen rotation that keeps the horizon level; 0 when held upright in portrait. */
-fun rollDegrees(x: Float, y: Float): Float =
-    Math.toDegrees(atan2(x, y).toDouble()).toFloat()
+fun rollDegrees(x: Float, y: Float): Float = Math.toDegrees(atan2(x, y).toDouble()).toFloat()
 
 /** Quarter turns to the nearest upright or sideways hold. */
 fun quarterTurns(x: Float, y: Float): Int = (rollDegrees(x, y) / 90f).roundToInt()
 
 /**
- * Degrees the held edge leans away from straight up, counting both sideways roll and
- * leaning forward or back, so 0 means the device stands perfectly vertical.
+ * Degrees the held edge leans away from straight up, counting both sideways roll and leaning
+ * forward or back, so 0 means the device stands perfectly vertical.
  */
 fun uprightTiltDegrees(x: Float, y: Float): Float {
     // Gravity along the edge pointing up in the nearest upright or sideways hold
-    val alongEdge = when (Math.floorMod(quarterTurns(x, y), 4)) {
-        0 -> y
-        1 -> x
-        2 -> -y
-        else -> -x
-    }
+    val alongEdge =
+        when (Math.floorMod(quarterTurns(x, y), 4)) {
+            0 -> y
+            1 -> x
+            2 -> -y
+            else -> -x
+        }
     return Math.toDegrees(acos(alongEdge.coerceIn(-1f, 1f).toDouble())).toFloat()
 }

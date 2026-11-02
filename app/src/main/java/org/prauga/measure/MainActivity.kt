@@ -15,9 +15,7 @@ class MainActivity : PvotBaseActivity() {
         val preferences = AppPreferences(applicationContext)
         setPvotContent {
             CompositionLocalProvider(LocalPvotGlassIntensity provides preferences.glassIntensity) {
-                PvotAppTheme {
-                    MeasureAppNavBar(preferences = preferences)
-                }
+                PvotAppTheme { MeasureAppNavBar(preferences = preferences) }
             }
         }
     }
@@ -26,7 +24,5 @@ class MainActivity : PvotBaseActivity() {
 @Preview(showBackground = true)
 @Composable
 fun MeasureAppPreview() {
-    PvotAppTheme {
-        MeasureAppNavBar(preferences = AppPreferences(LocalContext.current))
-    }
+    PvotAppTheme { MeasureAppNavBar(preferences = AppPreferences(LocalContext.current)) }
 }

@@ -15,21 +15,22 @@ private const val HALF_PI = (PI / 2).toFloat()
 private const val FULL_PI = PI.toFloat()
 
 /**
- * Outline of two equal circles that grow a smooth neck between them as they get close,
- * so they read as one liquid blob. Based on Hiroyuki Sato's metaball construction.
+ * Outline of two equal circles that grow a smooth neck between them as they get close, so they read
+ * as one liquid blob. Based on Hiroyuki Sato's metaball construction.
  */
 fun metaballPath(
     c1: Offset,
     c2: Offset,
     radius: Float,
     spread: Float = 0.5f,
-    handleSize: Float = 2.4f
+    handleSize: Float = 2.4f,
 ): Path {
-    val circles = Path.combine(
-        PathOperation.Union,
-        Path().apply { addOval(Rect(c1, radius)) },
-        Path().apply { addOval(Rect(c2, radius)) }
-    )
+    val circles =
+        Path.combine(
+            PathOperation.Union,
+            Path().apply { addOval(Rect(c1, radius)) },
+            Path().apply { addOval(Rect(c2, radius)) },
+        )
 
     val distance = (c2 - c1).getDistance()
     if (distance < 1f || distance > radius * 2.6f) return circles
@@ -57,13 +58,14 @@ fun metaballPath(
     val h3 = p3 + polar(handle, a3 + HALF_PI)
     val h4 = p4 + polar(handle, a4 - HALF_PI)
 
-    val neck = Path().apply {
-        moveTo(p1.x, p1.y)
-        cubicTo(h1.x, h1.y, h3.x, h3.y, p3.x, p3.y)
-        lineTo(p4.x, p4.y)
-        cubicTo(h4.x, h4.y, h2.x, h2.y, p2.x, p2.y)
-        close()
-    }
+    val neck =
+        Path().apply {
+            moveTo(p1.x, p1.y)
+            cubicTo(h1.x, h1.y, h3.x, h3.y, p3.x, p3.y)
+            lineTo(p4.x, p4.y)
+            cubicTo(h4.x, h4.y, h2.x, h2.y, p2.x, p2.y)
+            close()
+        }
     return Path.combine(PathOperation.Union, circles, neck)
 }
 

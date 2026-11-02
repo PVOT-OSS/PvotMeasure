@@ -32,9 +32,9 @@ fun measureChainMeters(points: List<Position>): Float {
 }
 
 /**
- * True when any point of [current] has moved more than [epsilonMeters] from [previous], or when
- * the lists differ in size. Anchors drift as tracking refines, and writing every frame's poses
- * into Compose state would recompose the scene for jitter no one can see.
+ * True when any point of [current] has moved more than [epsilonMeters] from [previous], or when the
+ * lists differ in size. Anchors drift as tracking refines, and writing every frame's poses into
+ * Compose state would recompose the scene for jitter no one can see.
  */
 fun measurePointsMoved(
     previous: List<Position>,

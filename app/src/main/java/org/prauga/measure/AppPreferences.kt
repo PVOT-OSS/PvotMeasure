@@ -6,8 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.prauga.pvot.designsystem.effects.PvotGlassDefaults
-import org.prauga.measure.measure.MeasureUnitSystem
 import java.util.Locale
+import org.prauga.measure.measure.MeasureUnitSystem
 
 /** The app's few settings, kept in SharedPreferences and observable from Compose. */
 class AppPreferences(context: Context) {
@@ -15,9 +15,10 @@ class AppPreferences(context: Context) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     /** Liquid glass at full strength when on, the frosted look when off. */
-    var liquidGlass by mutableStateOf(
-        prefs.getBoolean(KEY_LIQUID_GLASS, PvotGlassDefaults.defaultIntensity() > 0f)
-    )
+    var liquidGlass by
+        mutableStateOf(
+            prefs.getBoolean(KEY_LIQUID_GLASS, PvotGlassDefaults.defaultIntensity() > 0f)
+        )
         private set
 
     fun updateLiquidGlass(enabled: Boolean) {
@@ -26,12 +27,13 @@ class AppPreferences(context: Context) {
     }
 
     /** Feet and inches when on, metres when off; starts as the locale's habit. */
-    var imperialUnits by mutableStateOf(
-        prefs.getBoolean(
-            KEY_IMPERIAL,
-            MeasureUnitSystem.forLocale(Locale.getDefault()) == MeasureUnitSystem.Imperial
+    var imperialUnits by
+        mutableStateOf(
+            prefs.getBoolean(
+                KEY_IMPERIAL,
+                MeasureUnitSystem.forLocale(Locale.getDefault()) == MeasureUnitSystem.Imperial,
+            )
         )
-    )
         private set
 
     fun updateImperialUnits(enabled: Boolean) {
@@ -49,11 +51,12 @@ class AppPreferences(context: Context) {
     }
 
     val unitSystem: MeasureUnitSystem
-        get() = when {
-            !imperialUnits -> MeasureUnitSystem.Metric
-            inchesOnly -> MeasureUnitSystem.Inches
-            else -> MeasureUnitSystem.Imperial
-        }
+        get() =
+            when {
+                !imperialUnits -> MeasureUnitSystem.Metric
+                inchesOnly -> MeasureUnitSystem.Inches
+                else -> MeasureUnitSystem.Imperial
+            }
 
     /** The value for [com.prauga.pvot.designsystem.effects.LocalPvotGlassIntensity]. */
     val glassIntensity: Float

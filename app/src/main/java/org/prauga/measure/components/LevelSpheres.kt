@@ -20,8 +20,8 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
- * Two glass spheres that drift apart along the tilt direction and merge into one
- * bubble as the device approaches level.
+ * Two glass spheres that drift apart along the tilt direction and merge into one bubble as the
+ * device approaches level.
  *
  * @param x gravity along the screen's x axis (right), as a unit vector component
  * @param y gravity along the screen's y axis (up), as a unit vector component
@@ -33,28 +33,30 @@ fun LevelSpheres(
     y: Float,
     levelProgress: Float,
     colors: LevelColors,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Canvas(modifier = modifier) {
         val radius = size.minDimension * 0.22f
         val planar = sqrt(x * x + y * y)
         val tilt = flatTiltDegrees(x, y)
 
-        val direction =
-            if (planar > 0.0001f) Offset(x / planar, -y / planar) else Offset(0f, 1f)
+        val direction = if (planar > 0.0001f) Offset(x / planar, -y / planar) else Offset(0f, 1f)
         // Each degree of tilt pushes the spheres a tenth of a radius apart. Sideways they may
         // clip a fifth past the narrow edges so they can still fully separate; vertically
         // they stop short of the nav bar
         val sideLimit = size.width / 2 - radius * 0.8f
         val verticalLimit = size.height / 2 - radius - size.height * 0.08f
-        val maxSeparation = minOf(
-            if (abs(direction.x) > 0.001f) sideLimit / abs(direction.x) else Float.MAX_VALUE,
-            if (abs(direction.y) > 0.001f) verticalLimit / abs(direction.y) else Float.MAX_VALUE
-        ).coerceAtLeast(0f)
+        val maxSeparation =
+            minOf(
+                    if (abs(direction.x) > 0.001f) sideLimit / abs(direction.x)
+                    else Float.MAX_VALUE,
+                    if (abs(direction.y) > 0.001f) verticalLimit / abs(direction.y)
+                    else Float.MAX_VALUE,
+                )
+                .coerceAtLeast(0f)
         // Ease the spheres into one bubble as the level turns green, so 0° never shows
         // two slightly offset spheres
-        val separation =
-            (radius * tilt / 10f).coerceAtMost(maxSeparation) * (1f - levelProgress)
+        val separation = (radius * tilt / 10f).coerceAtMost(maxSeparation) * (1f - levelProgress)
 
         val c1 = center + direction * separation
         val c2 = center - direction * separation
@@ -87,7 +89,7 @@ fun LevelSpheres(
         drawPath(
             path = blob,
             color = rim.copy(alpha = 0.14f + 0.36f * levelProgress),
-            style = Stroke(width = 1.dp.toPx())
+            style = Stroke(width = 1.dp.toPx()),
         )
     }
 }
@@ -97,24 +99,25 @@ private fun DrawScope.drawSphereShading(
     center: Offset,
     radius: Float,
     rim: Color,
-    levelProgress: Float
+    levelProgress: Float,
 ) {
     drawCircle(
-        brush = Brush.radialGradient(
-            0f to Color.Transparent,
-            0.7f to Color.Transparent,
-            1f to rim.copy(alpha = 0.07f + 0.13f * levelProgress),
-            center = center,
-            radius = radius
-        ),
+        brush =
+            Brush.radialGradient(
+                0f to Color.Transparent,
+                0.7f to Color.Transparent,
+                1f to rim.copy(alpha = 0.07f + 0.13f * levelProgress),
+                center = center,
+                radius = radius,
+            ),
         radius = radius,
-        center = center
+        center = center,
     )
 }
 
 /**
- * The background grid as seen through a glass sphere: magnified at the centre and bent
- * toward the rim, which is what gives the spheres their curved inner lines.
+ * The background grid as seen through a glass sphere: magnified at the centre and bent toward the
+ * rim, which is what gives the spheres their curved inner lines.
  */
 private fun DrawScope.drawRefractedGrid(center: Offset, radius: Float, color: Color) {
     if (color.alpha <= 0f) return
@@ -125,18 +128,16 @@ private fun DrawScope.drawRefractedGrid(center: Offset, radius: Float, color: Co
         val dx = x - center.x
         if (abs(dx) >= radius) continue
         val half = sqrt(radius * radius - dx * dx)
-        val chord = refractedChord(
-            Offset(x, center.y - half), Offset(x, center.y + half), center, radius
-        )
+        val chord =
+            refractedChord(Offset(x, center.y - half), Offset(x, center.y + half), center, radius)
         drawPath(chord, color, style = stroke)
     }
     for (y in lines.ys) {
         val dy = y - center.y
         if (abs(dy) >= radius) continue
         val half = sqrt(radius * radius - dy * dy)
-        val chord = refractedChord(
-            Offset(center.x - half, y), Offset(center.x + half, y), center, radius
-        )
+        val chord =
+            refractedChord(Offset(center.x - half, y), Offset(center.x + half, y), center, radius)
         drawPath(chord, color, style = stroke)
     }
 }

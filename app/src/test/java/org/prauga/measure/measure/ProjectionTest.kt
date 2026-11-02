@@ -8,12 +8,8 @@ import org.junit.Test
 
 class ProjectionTest {
     // x and y pass through, w = z: a point at (1, 0, 2) is at ndc x = 0.5.
-    private val matrix = floatArrayOf(
-        1f, 0f, 0f, 0f,
-        0f, 1f, 0f, 0f,
-        0f, 0f, 1f, 1f,
-        0f, 0f, 0f, 0f,
-    )
+    private val matrix =
+        floatArrayOf(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 1f, 0f, 0f, 0f, 0f)
 
     @Test
     fun centreMapsToTheMiddleOfTheView() {
@@ -42,7 +38,8 @@ class ProjectionTest {
 
     @Test
     fun segmentCrossingTheCameraPlaneIsCut() {
-        val (a, b) = projectSegment(matrix, Position(0f, 0f, 2f), Position(4f, 0f, -2f), 200f, 100f)!!
+        val (a, b) =
+            projectSegment(matrix, Position(0f, 0f, 2f), Position(4f, 0f, -2f), 200f, 100f)!!
         assertEquals(100f, a.x, 1e-3f)
         assertNotNull(b)
         // The far end is cut at w = 0.05, where x/w is huge, so it ends beyond the right edge.

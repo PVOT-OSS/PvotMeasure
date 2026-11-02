@@ -35,9 +35,13 @@ import org.prauga.measure.measure.MeasureUnitSystem
 /** What stands between the user and a working AR view. */
 private sealed interface MeasureAccess {
     data object NeedsCamera : MeasureAccess
+
     data object Checking : MeasureAccess
+
     data object Unsupported : MeasureAccess
+
     data object SessionFailed : MeasureAccess
+
     data object Ready : MeasureAccess
 }
 
@@ -50,9 +54,10 @@ fun MeasureScreen(unitSystem: MeasureUnitSystem, modifier: Modifier = Modifier) 
                 PackageManager.PERMISSION_GRANTED
         )
     }
-    val requestCamera = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-        cameraGranted = it
-    }
+    val requestCamera =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+            cameraGranted = it
+        }
     var availability by remember { mutableStateOf<ArCoreApk.Availability?>(null) }
     var sessionFailed by remember { mutableStateOf(false) }
     var checkAgain by remember { mutableStateOf(0) }
@@ -70,50 +75,55 @@ fun MeasureScreen(unitSystem: MeasureUnitSystem, modifier: Modifier = Modifier) 
         availability = result
     }
 
-    val access = when {
-        !cameraGranted -> MeasureAccess.NeedsCamera
-        availability == null -> MeasureAccess.Checking
-        !availability!!.isSupported -> MeasureAccess.Unsupported
-        sessionFailed -> MeasureAccess.SessionFailed
-        else -> MeasureAccess.Ready
-    }
+    val access =
+        when {
+            !cameraGranted -> MeasureAccess.NeedsCamera
+            availability == null -> MeasureAccess.Checking
+            !availability!!.isSupported -> MeasureAccess.Unsupported
+            sessionFailed -> MeasureAccess.SessionFailed
+            else -> MeasureAccess.Ready
+        }
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         when (access) {
-            MeasureAccess.NeedsCamera -> Column(
-                modifier = Modifier.padding(PvotSpacing.L),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(PvotSpacing.L)
-            ) {
-                Text(
-                    text = stringResource(R.string.measure_camera_needed),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Button(onClick = { requestCamera.launch(Manifest.permission.CAMERA) }) {
-                    Text(stringResource(R.string.measure_allow_camera))
+            MeasureAccess.NeedsCamera ->
+                Column(
+                    modifier = Modifier.padding(PvotSpacing.L),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(PvotSpacing.L),
+                ) {
+                    Text(
+                        text = stringResource(R.string.measure_camera_needed),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Button(onClick = { requestCamera.launch(Manifest.permission.CAMERA) }) {
+                        Text(stringResource(R.string.measure_allow_camera))
+                    }
                 }
-            }
 
             MeasureAccess.Checking -> PvotLoadingContent()
 
-            MeasureAccess.Unsupported -> PvotErrorContent(
-                title = stringResource(R.string.measure_ar_unsupported_title),
-                message = stringResource(R.string.measure_ar_unsupported_message),
-                onRetry = { checkAgain++ }
-            )
+            MeasureAccess.Unsupported ->
+                PvotErrorContent(
+                    title = stringResource(R.string.measure_ar_unsupported_title),
+                    message = stringResource(R.string.measure_ar_unsupported_message),
+                    onRetry = { checkAgain++ },
+                )
 
-            MeasureAccess.SessionFailed -> PvotErrorContent(
-                title = stringResource(R.string.measure_ar_failed_title),
-                message = stringResource(R.string.measure_ar_failed_message),
-                onRetry = { checkAgain++ }
-            )
+            MeasureAccess.SessionFailed ->
+                PvotErrorContent(
+                    title = stringResource(R.string.measure_ar_failed_title),
+                    message = stringResource(R.string.measure_ar_failed_message),
+                    onRetry = { checkAgain++ },
+                )
 
-            MeasureAccess.Ready -> MeasureCamera(
-                unitSystem = unitSystem,
-                onSessionFailure = { sessionFailed = true },
-                modifier = Modifier.fillMaxSize()
-            )
+            MeasureAccess.Ready ->
+                MeasureCamera(
+                    unitSystem = unitSystem,
+                    onSessionFailure = { sessionFailed = true },
+                    modifier = Modifier.fillMaxSize(),
+                )
         }
     }
 }

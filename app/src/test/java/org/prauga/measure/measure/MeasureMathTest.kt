@@ -1,11 +1,11 @@
 package org.prauga.measure.measure
 
 import io.github.sceneview.math.Position
+import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.util.Locale
 
 class MeasureMathTest {
     @Test

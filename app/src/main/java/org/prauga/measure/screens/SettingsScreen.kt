@@ -26,159 +26,136 @@ import org.prauga.measure.BuildConfig
 import org.prauga.measure.R
 
 @Composable
-fun SettingsScreen(
-    preferences: AppPreferences,
-    modifier: Modifier = Modifier
-) {
+fun SettingsScreen(preferences: AppPreferences, modifier: Modifier = Modifier) {
     PvotScreen(
         modifier = modifier,
-        contentPadding = PvotScreenDefaults.contentPadding(
-            top = PvotScreenDefaults.TopPadding +
-                WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-        )
+        contentPadding =
+            PvotScreenDefaults.contentPadding(
+                top =
+                    PvotScreenDefaults.TopPadding +
+                        WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+            ),
     ) {
         item {
             PvotSectionHeader(
                 title = stringResource(R.string.settings_section_appearance),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .pvotReveal(0)
+                modifier = Modifier.fillMaxWidth().pvotReveal(0),
             )
         }
         item {
             PvotCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .pvotReveal(1),
-                onClick = { preferences.updateLiquidGlass(!preferences.liquidGlass) }
+                modifier = Modifier.fillMaxWidth().pvotReveal(1),
+                onClick = { preferences.updateLiquidGlass(!preferences.liquidGlass) },
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PvotSpacing.L),
+                    modifier = Modifier.fillMaxWidth().padding(PvotSpacing.L),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(PvotSpacing.L)
+                    horizontalArrangement = Arrangement.spacedBy(PvotSpacing.L),
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(R.string.settings_glass_title),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             text = stringResource(R.string.settings_glass_subtitle),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = PvotSpacing.XS)
+                            modifier = Modifier.padding(top = PvotSpacing.XS),
                         )
                     }
                     Switch(
                         checked = preferences.liquidGlass,
-                        onCheckedChange = preferences::updateLiquidGlass
+                        onCheckedChange = preferences::updateLiquidGlass,
                     )
                 }
             }
         }
         item {
             PvotCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .pvotReveal(2),
-                onClick = { preferences.updateImperialUnits(!preferences.imperialUnits) }
+                modifier = Modifier.fillMaxWidth().pvotReveal(2),
+                onClick = { preferences.updateImperialUnits(!preferences.imperialUnits) },
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PvotSpacing.L),
+                    modifier = Modifier.fillMaxWidth().padding(PvotSpacing.L),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(PvotSpacing.L)
+                    horizontalArrangement = Arrangement.spacedBy(PvotSpacing.L),
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(R.string.settings_units_title),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             text = stringResource(R.string.settings_units_subtitle),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = PvotSpacing.XS)
+                            modifier = Modifier.padding(top = PvotSpacing.XS),
                         )
                     }
                     Switch(
                         checked = preferences.imperialUnits,
-                        onCheckedChange = preferences::updateImperialUnits
+                        onCheckedChange = preferences::updateImperialUnits,
                     )
                 }
             }
         }
         // Only means something with imperial units, so it shows only then.
-        if (preferences.imperialUnits) item(key = "inches_only") {
-            PvotCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateItem()
-                    .pvotReveal(3),
-                onClick = { preferences.updateInchesOnly(!preferences.inchesOnly) }
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PvotSpacing.L),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(PvotSpacing.L)
+        if (preferences.imperialUnits)
+            item(key = "inches_only") {
+                PvotCard(
+                    modifier = Modifier.fillMaxWidth().animateItem().pvotReveal(3),
+                    onClick = { preferences.updateInchesOnly(!preferences.inchesOnly) },
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.settings_inches_title),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = stringResource(R.string.settings_inches_subtitle),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = PvotSpacing.XS)
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(PvotSpacing.L),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(PvotSpacing.L),
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_inches_title),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_inches_subtitle),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = PvotSpacing.XS),
+                            )
+                        }
+                        Switch(
+                            checked = preferences.inchesOnly,
+                            onCheckedChange = preferences::updateInchesOnly,
                         )
                     }
-                    Switch(
-                        checked = preferences.inchesOnly,
-                        onCheckedChange = preferences::updateInchesOnly
-                    )
                 }
             }
-        }
         item {
             PvotSectionHeader(
                 title = stringResource(R.string.settings_section_about),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .pvotReveal(4)
+                modifier = Modifier.fillMaxWidth().pvotReveal(4),
             )
         }
         item {
-            PvotCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .pvotReveal(5)
-            ) {
+            PvotCard(modifier = Modifier.fillMaxWidth().pvotReveal(5)) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PvotSpacing.L),
+                    modifier = Modifier.fillMaxWidth().padding(PvotSpacing.L),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
                         text = stringResource(R.string.settings_version_title),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         text = BuildConfig.VERSION_NAME,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

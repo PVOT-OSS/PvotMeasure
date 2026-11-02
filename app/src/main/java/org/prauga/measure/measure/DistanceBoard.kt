@@ -17,13 +17,16 @@ data class DistanceBoard<P>(val chains: List<DistanceChain<P>> = emptyList()) {
     val active: DistanceChain<P>?
         get() = chains.lastOrNull()?.takeIf { !it.ended }
 
-    val isEmpty: Boolean get() = chains.isEmpty()
+    val isEmpty: Boolean
+        get() = chains.isEmpty()
 
     /** Every anchored point on the board, for cleanup. */
-    val allPoints: List<P> get() = chains.flatMap { it.points }
+    val allPoints: List<P>
+        get() = chains.flatMap { it.points }
 
     /** A chain with at least one segment can be ended. */
-    val canFinish: Boolean get() = (active?.points?.size ?: 0) >= 2
+    val canFinish: Boolean
+        get() = (active?.points?.size ?: 0) >= 2
 
     /** Adds [point] to the active chain, or starts a new one. */
     fun add(point: P): DistanceBoard<P> {
@@ -44,7 +47,9 @@ data class DistanceBoard<P>(val chains: List<DistanceChain<P>> = emptyList()) {
     fun undo(): DistanceBoard<P> {
         val last = chains.lastOrNull() ?: return this
         val shorter = last.copy(points = last.points.dropLast(1), ended = false)
-        return copy(chains = chains.dropLast(1) + listOfNotNull(shorter.takeIf { it.points.isNotEmpty() }))
+        return copy(
+            chains = chains.dropLast(1) + listOfNotNull(shorter.takeIf { it.points.isNotEmpty() })
+        )
     }
 
     fun clear(): DistanceBoard<P> = DistanceBoard()

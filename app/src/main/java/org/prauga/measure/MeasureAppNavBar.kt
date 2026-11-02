@@ -31,7 +31,6 @@ import org.prauga.measure.screens.SettingsScreen
 /** Pixels of scroll in one event before the nav bar reacts, so a jitter doesn't flip it. */
 private const val ScrollThreshold = 4f
 
-
 @Composable
 fun MeasureAppNavBar(preferences: AppPreferences) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
@@ -48,23 +47,24 @@ fun MeasureAppNavBar(preferences: AppPreferences) {
     }
     val backdrop = rememberPvotGlassBackdrop()
 
-    val tabs = listOf(
-        PvotTabItem(
-            iconRes = R.drawable.ic_measure,
-            labelRes = R.string.tab_measure,
-            contentDescriptionRes = R.string.cd_measure
-        ),
-        PvotTabItem(
-            iconRes = R.drawable.ic_level,
-            labelRes = R.string.tab_level,
-            contentDescriptionRes = R.string.cd_level
-        ),
-        PvotTabItem(
-            iconRes = R.drawable.ic_settings,
-            labelRes = R.string.tab_settings,
-            contentDescriptionRes = R.string.cd_settings
+    val tabs =
+        listOf(
+            PvotTabItem(
+                iconRes = R.drawable.ic_measure,
+                labelRes = R.string.tab_measure,
+                contentDescriptionRes = R.string.cd_measure,
+            ),
+            PvotTabItem(
+                iconRes = R.drawable.ic_level,
+                labelRes = R.string.tab_level,
+                contentDescriptionRes = R.string.cd_level,
+            ),
+            PvotTabItem(
+                iconRes = R.drawable.ic_settings,
+                labelRes = R.string.tab_settings,
+                contentDescriptionRes = R.string.cd_settings,
+            ),
         )
-    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -81,21 +81,21 @@ fun MeasureAppNavBar(preferences: AppPreferences) {
                 tabs = tabs,
                 // The camera wants the room, not the bar: it stays small while measuring.
                 compact = navCompact || selectedTab == 0,
-                backdrop = backdrop
+                backdrop = backdrop,
             )
-        }
+        },
     ) { innerPadding ->
         // Screens draw edge to edge under the bar; the backdrop lets the glass bar frost them.
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .pvotGlassBackdrop(backdrop)
-                .background(MaterialTheme.colorScheme.background)
+            modifier =
+                Modifier.fillMaxSize()
+                    .pvotGlassBackdrop(backdrop)
+                    .background(MaterialTheme.colorScheme.background)
         ) {
-            val screenModifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(scrollConnection)
-                .padding(top = innerPadding.calculateTopPadding())
+            val screenModifier =
+                Modifier.fillMaxSize()
+                    .nestedScroll(scrollConnection)
+                    .padding(top = innerPadding.calculateTopPadding())
 
             when (selectedTab) {
                 0 -> MeasureScreen(unitSystem = preferences.unitSystem, modifier = screenModifier)

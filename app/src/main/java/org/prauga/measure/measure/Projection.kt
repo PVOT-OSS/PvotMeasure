@@ -21,22 +21,29 @@ fun multiplyMatrices(a: FloatArray, b: FloatArray): FloatArray {
     return out
 }
 
-private fun clip(m: FloatArray, p: Position): FloatArray = floatArrayOf(
-    m[0] * p.x + m[4] * p.y + m[8] * p.z + m[12],
-    m[1] * p.x + m[5] * p.y + m[9] * p.z + m[13],
-    m[3] * p.x + m[7] * p.y + m[11] * p.z + m[15],
-)
+private fun clip(m: FloatArray, p: Position): FloatArray =
+    floatArrayOf(
+        m[0] * p.x + m[4] * p.y + m[8] * p.z + m[12],
+        m[1] * p.x + m[5] * p.y + m[9] * p.z + m[13],
+        m[3] * p.x + m[7] * p.y + m[11] * p.z + m[15],
+    )
 
-private fun toScreen(c: FloatArray, width: Float, height: Float) = ScreenPoint(
-    x = (c[0] / c[2] * 0.5f + 0.5f) * width,
-    y = (1f - (c[1] / c[2] * 0.5f + 0.5f)) * height,
-)
+private fun toScreen(c: FloatArray, width: Float, height: Float) =
+    ScreenPoint(
+        x = (c[0] / c[2] * 0.5f + 0.5f) * width,
+        y = (1f - (c[1] / c[2] * 0.5f + 0.5f)) * height,
+    )
 
 /**
  * Where world point [p] lands on a view of [width] by [height] pixels, given the camera's
  * view-projection matrix, or null when it is behind the camera.
  */
-fun projectToScreen(viewProjection: FloatArray, p: Position, width: Float, height: Float): ScreenPoint? {
+fun projectToScreen(
+    viewProjection: FloatArray,
+    p: Position,
+    width: Float,
+    height: Float,
+): ScreenPoint? {
     val c = clip(viewProjection, p)
     return if (c[2] > MIN_W) toScreen(c, width, height) else null
 }
