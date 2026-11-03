@@ -17,13 +17,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven("https://pvot-oss.github.io/PvotLib/maven") {
+            content { includeGroup("com.prauga.pvot") }
+        }
     }
 }
 
 rootProject.name = "Measure"
 
 include(":app")
-
-// PvotLib builds from the submodule with its own build-logic and version catalog;
-// com.prauga.pvot:design-system resolves to its :design-system project.
-includeBuild("PvotLib")
