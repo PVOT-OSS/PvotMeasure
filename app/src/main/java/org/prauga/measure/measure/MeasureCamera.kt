@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Saalim Quadri <danascape@gmail.com>
+// SPDX-FileCopyrightText: 2026 debz-g <77199373+debz-g@users.noreply.github.com>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // The hit test follows the SceneView demo app's Measure (https://github.com/sceneview/sceneview,
 // Apache-2.0). See THIRD_PARTY_NOTICES.md.
 

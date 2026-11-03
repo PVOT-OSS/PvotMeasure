@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Saalim Quadri <danascape@gmail.com>
+// SPDX-FileCopyrightText: 2026 Shivansh Pandey <shivanshp987@gmail.com>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package org.prauga.measure.screens
 
 import android.content.Context

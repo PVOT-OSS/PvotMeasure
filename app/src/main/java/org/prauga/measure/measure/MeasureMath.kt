@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Saalim Quadri <danascape@gmail.com>
+// SPDX-FileCopyrightText: 2026 debz-g <77199373+debz-g@users.noreply.github.com>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // Adapted from the SceneView demo app (https://github.com/sceneview/sceneview,
 // samples/android-demo, Apache-2.0). See THIRD_PARTY_NOTICES.md.
 

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Shivansh Pandey <shivanshp987@gmail.com>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package org.prauga.measure.components
 
 import androidx.compose.foundation.Canvas

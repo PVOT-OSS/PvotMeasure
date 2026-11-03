@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Saalim Quadri <danascape@gmail.com>
+// SPDX-FileCopyrightText: 2026 debz-g <77199373+debz-g@users.noreply.github.com>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)

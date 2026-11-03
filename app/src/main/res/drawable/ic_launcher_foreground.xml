@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: 2026 Saalim Quadri <danascape@gmail.com>
+     SPDX-FileCopyrightText: 2026 Shivansh Pandey <shivanshp987@gmail.com>
+     SPDX-License-Identifier: GPL-3.0-or-later
+-->
 <!-- The level as it reads in the app: two glass spheres merging, a grid line bent
      through each, the equator and the horizon marks. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"

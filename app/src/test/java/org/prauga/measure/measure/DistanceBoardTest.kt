@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 debz-g <77199373+debz-g@users.noreply.github.com>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 package org.prauga.measure.measure
 
 import org.junit.Assert.assertEquals
